@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+#Save {
+           	background-color: Blue;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+            }
+table,td,th {
+			border: 1px solid;
+            padding: 10px;
+        }
+ 
+table {
+            text-align: center;
+            width:50%
+        }
+</style>
+</head>
+<script type="text/javascript">
+window.onload = function(e){ 
+    var json= '{';
+	json = json+'}';
+    const xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function(){
+		if(xhttp.readyState == XMLHttpRequest.DONE){
+			var responseJson=JSON.parse(xhttp.responseText);
+			console.log("json obj:" +responseJson);
+			for(let i = 0; i < responseJson.length; i++) {
+			    let obj = responseJson[i];
+			    console.log("obj value:" +obj);
+			    var bodyNode=document.getElementById("accessListBody");
+				const node=document.createElement("tr");
+				var index=1;
+				while(document.getElementById("accessName"+index)){
+					index=index+1;
+				}
+				node.id="accessName"+index;
+				node.appendChild(appendTD1("accessName_"+index+"_text",obj,"accessName_"+index+"_checkbox"));
+				node.appendChild(appendTD2("accessName_"+index+"_checkbox"));
+				bodyNode.appendChild(node);
+				document.getElementById("accessListBody").innerHTML=bodyNode.innerHTML;
+				document.getElementById("accessName_"+index+"_text").innerHTML = obj;
+				document.getElementById("accessName_"+index+"_checkbox").value = obj;
+			}
+		}
+	}
+    xhttp.open("GET", "/exercise/LoadRoleServlet");
+	xhttp.setRequestHeader("Accept","application/json");
+	xhttp.setRequestHeader("Content-type","application/json");
+	xhttp.send(json);
+}
+function appendTD1(inputTagId1,val,inputTagId2){
+	const tdnode=document.createElement("td");
+	const labelnode=document.createElement("label");
+	labelnode.id=inputTagId1;
+	tdnode.appendChild(labelnode);
+	labelnode.setAttribute("for",inputTagId2);
+	return tdnode;	
+}
+function appendTD2(inputTagId){
+	const tdnode=document.createElement("td");
+	const labelnode=document.createElement("label");
+	const inputnode=document.createElement("input");
+	inputnode.type="checkbox";
+	inputnode.id=inputTagId;
+	inputnode.className="role_checkbox";
+	tdnode.appendChild(labelnode);
+	labelnode.appendChild(inputnode);
+	return tdnode;
+}
+
+function saveRoleData(context){
+	var roleName=document.getElementById("roleName").value;
+	var roleDescription=document.getElementById("roleDescription").value;
+	var json= '{';
+	json = json+'"roleName":"'+roleName+'",';
+	json = json+'"roleDescription":"'+roleDescription+'",';
+	json = json+'"accessList":[';
+	var index=1;
+	var accessList = new Array();
+	while(document.getElementById("accessName"+index)){
+	var accessName = document.getElementById("accessName_"+index+"_checkbox");
+	if (accessName.checked){
+		accessList.push(accessName.value);
+	}
+		
+	index++;
+	}
+	/* var accessName;
+		
+		for (var i = 1; i < accessList.length; i++) {
+	        if (accessList[i].checked){
+	        	if(accessName != null){
+	        		json = json+',';
+	        	}
+	        	accessName=accessList[i].value;
+	        	//'"accessName":
+	        }
+	    } */
+	json = json+'{';
+    json = json+'"accessName":"'+accessList+'"';
+    json = json+'}';
+	json = json+']';
+	json = json+'}';
+	console.log(json);
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function(){
+		if(xhttp.readyState == XMLHttpRequest.DONE){
+			console.log(xhttp.responseText);
+			var responseJson=JSON.parse(xhttp.responseText);
+			if(responseJson.dataObject && responseJson.dataObject.id){
+				document.getElementById("status").innerHTML = "Save Successfull";
+				document.getElementById("status").style="color:green;"
+			}else{
+				document.getElementById("status").innerHTML = "Save Failed, Please check validations!";
+				document.getElementById("status").style="color:red;"
+			}
+		}
+	}
+	xhttp.open("POST", "/exercise/RoleServlet");
+	xhttp.setRequestHeader("Accept","application/json");
+	xhttp.setRequestHeader("Content-type","application/json");
+	xhttp.send(json);
+	
+}
+function toggle(source) { 
+    let checkboxes = document 
+        .querySelectorAll('input[type="checkbox"]'); 
+    for (let i = 0; i < checkboxes.length; i++) { 
+        if (checkboxes[i] != source) 
+            checkboxes[i].checked = source.checked; 
+    } 
+} 
+</script>
+<body>
+<h1>Roles and Access List</h1>
+	<div id="status"></div>
+	<div id="RoleData">
+		<br><label>Role Name:</label> 
+		<input type="text" value="" id="roleName" /> <br>
+		<br><label>Role Description:</label>
+		<input type="text" value="" id="roleDescription" /> <br>
+	</div><br>
+	<div id="accessList">
+	<table id="accessListTable">
+		<tbody id="accessListBody">
+			<tr id="accessName0">
+				<td id="accessName_0_text">AccessName</td>
+				<td><input type="checkbox" id="accessName_0_checkbox" onclick="toggle(this);"></td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+<div id="actions">
+	<button id="Save" onclick="javascript:saveRoleData(this);">SAVE</button>
+</div>
+
+</body>
+</html>

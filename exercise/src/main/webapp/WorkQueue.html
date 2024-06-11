@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>WorkQueue</title>
+</head>
+
+<script>
+	function onClickAdd(context) {
+	    var bodyNode = document.getElementById("workQueueAccessTableBody");
+	    const node = document.createElement("tr");
+	    var index = 1;
+	    while(document.getElementById("workQueueAccess" + index)) {
+	        index = index + 1;
+	    }
+	    node.id = "workQueueAccess"+index;
+	    node.appendChild(appendSelect("workQueueAccess_"+index+"_accessType", "fetchDropdownData("+index+")"));
+	    node.appendChild(appendSelect("workQueueAccess_"+index+"_accessTypeList"));
+	    node.appendChild(appendButton("Delete", index));
+	    bodyNode.appendChild(node);
+	}
+	
+	function appendButton(buttonId, index) {
+	    const tdnode = document.createElement("td");
+	    var buttonHtml = '<button id="Delete" index="'+index+'" onclick="javascript:onClickDelete(this);">Delete</button>';
+	    tdnode.innerHTML = buttonHtml;
+	    return tdnode;
+	}
+	
+	function appendSelect(selectId, onchangeFunc = null) {
+	    const tdnode = document.createElement("td");
+	    const selectnode = document.createElement("select");
+	    selectnode.id = selectId;
+	
+	    if (onchangeFunc) {
+	        selectnode.setAttribute("onchange", onchangeFunc);
+	    }
+	
+	    if (selectId.includes("accessType") && !selectId.includes("List")) {
+	        const defaultOption = document.createElement("option");
+	        defaultOption.value = "optionSelection";
+	        defaultOption.text = "Select an Access Type";
+	        selectnode.appendChild(defaultOption);
+	
+	        const roleOption = document.createElement("option");
+	        roleOption.value = "role";
+	        roleOption.text = "Role";
+	        selectnode.appendChild(roleOption);
+	
+	        const userOption = document.createElement("option");
+	        userOption.value = "user";
+	        userOption.text = "User";
+	        selectnode.appendChild(userOption);
+	    }
+	
+	    tdnode.appendChild(selectnode);
+	    return tdnode;
+	}
+	
+	function onClickDelete(context) {
+	    var index = context.getAttribute("index");
+	    var body = document.getElementById("workQueueAccessTableBody");
+	    var trNode = document.getElementById("workQueueAccess" + index);
+	    body.removeChild(trNode);
+	}
+
+	function saveWorkQueueData(context) {
+		var workQueueName = document.getElementById("workQueueName").value;
+		
+	
+	var json = '{';
+	    json = json+'"workQueueName":"'+workQueueName+'",';
+		json = json+'"workQueueAccesses":[';
+		
+		var index = 0;
+		while(document.getElementById("workQueueAccess" + index)) {
+			if(index > 0) {
+				json = json+',';
+			}
+			var accessType = document.getElementById("workQueueAccess_"+index+"_accessType").value;
+	        var accessTypeListValue = document.getElementById("workQueueAccess_"+index+"_accessTypeList").value;
+				json = json+'{';
+				json = json+'"accessType":"'+accessType+'",';
+				if (accessType === 'role') {
+	            	json += '"role":{"id":' + accessTypeListValue + '}';
+	            } else if (accessType === 'user') {
+	           		json += '"user":{"id":' + accessTypeListValue + '}';
+	       		}
+				json = json+'}';
+				index++;
+		}
+		json = json+']';
+		json = json+'}';
+		console.log(json);
+		
+		const xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if(xhttp.readyState == 4 && xhttp.status == 200) {
+				console.log(xhttp.responseText);
+				var response = JSON.parse(xhttp.responseText);
+				if(response.dataObject && response.dataObject.id) {
+					document.getElementById("status").innerHTML = "Saved Successfully";
+					document.getElementById("status").style = "color:green";
+				} else {
+					document.getElementById("status").innerHTML = "Save Failed. Please Check the Validations";
+					document.getElementById("status").style = "color:red";
+				}
+			} else {
+				console.log(xhttp.responseText);
+			}
+		}
+		
+		xhttp.open("POST", "/Exercise/WorkQueueServlet");
+		xhttp.setRequestHeader("Accept", "application/json");
+		xhttp.setRequestHeader("Content-type", "application/json");
+		xhttp.send(json);
+	}	
+	function fetchDropdownData(index) {
+		var selectedOption = document.getElementById("workQueueAccess_" + index + "_accessType").value;
+	    const xhttp = new XMLHttpRequest();
+	    xhttp.onreadystatechange = function() {
+	    	if (xhttp.readyState == 4) {
+	    		if (xhttp.status == 200) {
+	    			console.log(xhttp.responseText);
+	                    var response = JSON.parse(xhttp.responseText);
+	                    var dropdown = document.getElementById("workQueueAccess_" + index + "_accessTypeList");
+	                    dropdown.innerHTML = ""; // Clear previous options
+	                    response.forEach(function(item) {
+	                        var option = document.createElement("option");
+	                        option.text = item.name;
+	                        option.value = item.id;
+	                        dropdown.add(option);
+	                    });
+	                } else {
+	                    console.log("Error: " + xhttp.status + " - " + xhttp.statusText);
+	                }
+	    	}
+	        
+	    };
+	    var urlvalue = "/Exercise/WorkQueueServlet?selectedOption=" + selectedOption;
+	    console.log(urlvalue);
+	    xhttp.open("GET", urlvalue, true);
+	    xhttp.setRequestHeader("Accept", "application/json");
+		xhttp.send();
+	}
+</script>
+
+<body>
+<div id="status"></div>
+	<h1>WorkQueue</h1>
+	<div id="WorkQueue">
+		<label>Work Queue Name:</label>
+		<input type="text" value="" id="workQueueName"/><br><br>
+	</div>
+	
+	<div id="WorkQueueAccessData">
+	<h4>WorkQueueAccess</h4>
+		<table id="workQueueAccessTable">
+			<tbody id="workQueueAccessTableBody">
+				<tr>
+					<th>Access Type:</th>
+					<th>Role/User:</th>
+					<th><button id="Add" onclick="javascript:onClickAdd(this);">Add</button></th>
+				</tr>
+				<tr id="workQueueAccess0">
+					<td>
+						<div>
+							<select id="workQueueAccess_0_accessType" onchange="fetchDropdownData(0)">
+						        <option value="optionSelection">Select an Access Type</option>
+						        <option value="role">Role</option>
+						        <option value="user">User</option>
+						    </select>
+						</div>
+					</td> 
+					<td><label for="list"></label>
+				    	<select id="workQueueAccess_0_accessTypeList">
+				    	</select>
+					</td>
+					<td><button id="Delete" index="0" onclick="javascript:onClickDelete(this);">Delete</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div id="actions">
+		<button id="Save" onclick="javascript:saveWorkQueueData(this);">Save</button>
+	</div>
+</body>
+</html>

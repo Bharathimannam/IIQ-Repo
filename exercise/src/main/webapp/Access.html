@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Access Page</title>
+<style>
+#Retrieve {
+           	background-color: green;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+            }
+#Delete {
+           	background-color: red;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+            }
+#Save {
+           	background-color: Blue;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+            }
+
+#AccessData input{
+		display: inline-block;
+		text-align: left;
+	}
+</style>
+</head>
+<script type="text/javascript">
+function saveAccessData(context){
+	//var id=document.getElementById("id").value;
+	var accessName=document.getElementById("accessName").value;
+	var accessDescription=document.getElementById("accessDescription").value;
+	var action="Save";
+	var json= '{';
+	json = json+'"accessName":"'+accessName+'",';
+	json = json+'"accessDescription":"'+accessDescription+'",';
+	json = json+'"action":"'+action+'"';
+	json = json+'}';
+	console.log(json);
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function(){
+		if(xhttp.readyState == XMLHttpRequest.DONE){
+			console.log(xhttp.responseText);
+			var responseJson=JSON.parse(xhttp.responseText);
+			if(responseJson.dataObject && responseJson.dataObject.id){
+				document.getElementById("status").innerHTML = "Save Successfull";
+				document.getElementById("status").style="color:green;"
+			}else{
+				document.getElementById("status").innerHTML = "Save Failed, Please check validations!";
+				document.getElementById("status").style="color:red;"
+			}
+		}
+	}
+	xhttp.open("POST", "/exercise/AccessServlet");
+	xhttp.setRequestHeader("Accept","application/json");
+	xhttp.setRequestHeader("Content-type","application/json");
+	xhttp.send(json);
+	
+}
+
+
+function retrieveAccessData(context){
+	var accessName=document.getElementById("accessName").value;
+	var accessDescription=document.getElementById("accessDescription").value;
+	var action="Retrieve";
+	var json= '{';
+	json = json+'"accessName":"'+accessName+'",';
+	json = json+'"accessDescription":"'+accessDescription+'",';
+	json = json+'"action":"'+action+'"';
+	json = json+'}';
+	console.log(json);
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function(){
+		if(xhttp.readyState == XMLHttpRequest.DONE){
+			console.log(xhttp.responseText);
+			var responseJson=JSON.parse(xhttp.responseText);
+			if(responseJson.dataObject && responseJson.dataObject.accessDescription){
+				document.getElementById("status").innerHTML = "Retrieved Successfull";
+				document.getElementById("status").style="color:green;"
+			}else{
+				document.getElementById("status").innerHTML = "Retrieved Failed, Please check validations!";
+				document.getElementById("status").style="color:red;"
+			}
+		}
+	}
+	xhttp.open("POST", "/exercise/AccessServlet");
+	xhttp.setRequestHeader("Accept","application/json");
+	xhttp.setRequestHeader("Content-type","application/json");
+	xhttp.send(json);
+	
+}
+function deleteAccessData(context){
+	var accessName=document.getElementById("accessName").value;
+	var accessDescription=document.getElementById("accessDescription").value;
+	var action="Delete";
+	var json= '{';
+	json = json+'"accessName":"'+accessName+'",';
+	json = json+'"accessDescription":"'+accessDescription+'",';
+	json = json+'"action":"'+action+'"';
+	json = json+'}';
+	console.log(json);
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function(){
+		if(xhttp.readyState == XMLHttpRequest.DONE){
+			console.log(xhttp.responseText);
+			var responseJson=JSON.parse(xhttp.responseText);
+			if(responseJson.dataObject && responseJson.dataObject.accessName){
+				document.getElementById("status").innerHTML = "Delete Successfull";
+				document.getElementById("status").style="color:green;"
+			}else{
+				document.getElementById("status").innerHTML = "Delete Failed, Please check validations!";
+				document.getElementById("status").style="color:red;"
+			}
+		}
+	}
+	xhttp.open("POST", "/exercise/AccessServlet");
+	xhttp.setRequestHeader("Accept","application/json");
+	xhttp.setRequestHeader("Content-type","application/json");
+	xhttp.send(json);
+	
+}
+</script>
+<body>
+<h1>Manage Access</h1>
+	<div id="status"></div>
+	<div id="AccessData">
+		<br><label>Access Name:</label> 
+		<input type="text" value="" id="accessName" /> <br>
+		<br><label>Access Description:</label>
+		<input type="text" value="" id="accessDescription" /> <br>
+	</div><br>
+<div id="actions">
+	<button id="Save" onclick="javascript:saveAccessData(this);">SAVE</button>
+<!-- 	<button id="Retrieve" onclick="javascript:retrieveAccessData(this);">RETRIEVE</button> -->
+<!-- 	<button id="Delete" onclick="javascript:deleteAccessData(this);">DELETE</button> -->
+	
+</div>
+</body>
+</html>

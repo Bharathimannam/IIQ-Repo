@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SearchRequest</title>
+<style>
+table {
+	width: 50%;
+	border-collapse: collapse;
+}
+
+th, td {
+	border: 1px solid black;
+	padding: 8px;
+	text-align: center;
+}
+
+th {
+	background-color: #f2f2f2;
+}
+
+select {
+	width: 100%;
+}
+
+button {
+	margin: 5px;
+}
+</style>
+</head>
+<body>
+	<h2>SelectedColumns</h2>
+	<div id="selectedColumnData">
+		<table id="selectedColumnsTable">
+			<tbody id="selectedColumnsTableBody">
+				<tr>
+					<th>Field Name</th>
+					<th>Action</th>
+				</tr>
+				<tr id="selectedColumnsFields0">
+					<td><select name="fieldName"
+						id="selectedColumn_fields_0_fieldName">
+							<option value="role_name">role_name</option>
+							<option value="role_description">role_description</option>
+							<option value="access_name">access_name</option>
+							<option value="access_description">access_description</option>
+							<option value="last_name">last_name</option>
+							<option value="first_name">first_name</option>
+							<option value="email">email</option>
+							<option value="login_id">login_id</option>
+							<option value="password">password</option>
+							<option value="department">department</option>
+							<option value="work_queue_name">work_queue_name</option>
+							<option value="access_type">access_type</option>
+							<option value="entity_type">entity_type</option>
+							<option value="entity_code">entity_code</option>
+							<option value="entity_status">entity_status</option>
+					</select></td>
+					<td><button index="0" onclick="onClickDelete(this)">Delete</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div id="buttons">
+		<button id="Add" style="background-color: green;"
+			onclick="onClickAdd();">Add</button>
+	</div>
+
+	<h3>SearchRequest</h3>
+	<table id="dynamicTable">
+		<thead>
+			<tr>
+				<th>Field Name</th>
+				<th>Condition</th>
+				<th>Value</th>
+			</tr>
+		</thead>
+		<tbody id="dynamicTableBody">
+			<!-- Rows will be inserted here by JavaScript -->
+		</tbody>
+	</table>
+	<button onclick="addRow()">Add Row</button>
+	<button onclick="deleteRow()">Delete Row</button>
+
+	<h4>OrderBy</h4>
+	<div id="OrderByColumnsData">
+		<table id="orderByColumnsTable">
+			<tbody id="orderByColumnsTableBody">
+				<tr>
+					<th>Field Name</th>
+					<th>Order By</th>
+				</tr>
+				<tr id="orderByFields">
+					<td><select name="fieldName" id="selectedColumn_orderBy">
+							<option value="role_name">role_name</option>
+							<option value="role_description">role_description</option>
+							<option value="access_name">access_name</option>
+							<option value="access_description">access_description</option>
+							<option value="last_name">last_name</option>
+							<option value="first_name">first_name</option>
+							<option value="email">email</option>
+							<option value="login_id">login_id</option>
+							<option value="password">password</option>
+							<option value="department">department</option>
+							<option value="work_queue_name">work_queue_name</option>
+							<option value="access_type">access_type</option>
+							<option value="entity_type">entity_type</option>
+							<option value="entity_code">entity_code</option>
+							<option value="entity_status">entity_status</option>
+					</select></td>
+					<td><select name="order" id="selectedColumn_order">
+							<option value="asc">asc</option>
+							<option value="desc">desc</option>
+					</select></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div id="buttons">
+		<button id="Search" style="background-color: yellow;"
+			onclick="onClickSearch();">Search</button>
+	</div>
+
+	<h4>Results</h4>
+	<div id="ResultsData">
+		<table id="ResultsDataTable">
+			<tbody id="ResultsDataTableBody">
+				<tr>
+					<th>Field Name</th>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<script>
+        const fieldnameOptions = ["role_name", "role_description", "access_name", "access_description", "last_name", "first_name", "email", "login_id", "password", "department", "work_queue_name", "access_type", "entity_type", "entity_code", "entity_status"];
+        const fieldconditionOptions = ["equals", "not_equals", "greater_than", "less_than","contains","startswith","endswith"];
+        let selectedRowCount = 1;
+
+        function createDropdown(options) {
+            const select = document.createElement('select');
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.text = option;
+                select.appendChild(opt);
+            });
+            return select;
+        }
+
+        function onClickAdd() {
+            const table = document.getElementById('selectedColumnsTableBody');
+            const newRow = table.insertRow();
+
+            const fieldnameCell = newRow.insertCell(0);
+            const fieldnameDropdown = createDropdown(fieldnameOptions);
+            fieldnameDropdown.name = `fields_${selectedRowCount}_fieldName`;
+            fieldnameDropdown.id = `fields_${selectedRowCount}_fieldName`;
+            fieldnameCell.appendChild(fieldnameDropdown);
+
+            const deleteCell = newRow.insertCell(1);
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() {
+            	onClickDelete(newRow);
+            };
+            deleteCell.appendChild(deleteButton);
+
+            newRow.id = `fields${selectedRowCount}`;
+            selectedRowCount++;
+        }
+        function deleteRow(button) {
+            const row = button.parentNode.parentNode;
+            const table = row.parentNode;
+            table.removeChild(row);
+            selectedRowCount--;
+        }
+
+        
+        function deleteRow(button) {
+            // Get the row of the button
+            var row = button.parentNode.parentNode;
+            // Delete the row
+            row.parentNode.removeChild(row);
+        }
+        function onClickDelete() {
+            const table = document.getElementById('selectedColumnsTableBody');
+            const rowCount = table.rows.length;
+            if (rowCount > 1) { // Only delete if there are rows to delete
+                table.deleteRow(rowCount - 1);
+            }
+        }
+        
+        function copySelectedToResults() {
+            // Get the table bodies
+            const selectedColumnsTableBody = document.getElementById('selectedColumnsTableBody');
+            const resultsTableBody = document.getElementById('ResultsDataTableBody');
+
+            // Clear the results table
+            while (resultsTableBody.rows.length > 1) { // Start from 1 to keep the header row
+                resultsTableBody.deleteRow(1);
+            }
+
+            // Loop through each row in the selected columns table and copy to results table
+            for (let i = 1; i < selectedColumnsTableBody.rows.length; i++) { // Start at 1 to skip the header row
+                const row = selectedColumnsTableBody.rows[i];
+                const fieldName = row.cells[0].getElementsByTagName('select')[0].value;
+
+                const newRow = resultsTableBody.insertRow();
+                
+                const fieldNameCell = newRow.insertCell(0);
+                fieldNameCell.textContent = fieldName;
+            }
+        }
+        function addRow() {
+            const table = document.getElementById('dynamicTableBody');
+            const newRow = table.insertRow();
+
+            // Create fieldname dropdown
+            const fieldnameCell = newRow.insertCell(0);
+            const fieldnameDropdown = createDropdown(fieldnameOptions);
+            fieldnameCell.appendChild(fieldnameDropdown);
+
+            // Create fieldcondition dropdown
+            const fieldconditionCell = newRow.insertCell(1);
+            const fieldconditionDropdown = createDropdown(fieldconditionOptions);
+            fieldconditionCell.appendChild(fieldconditionDropdown);
+
+            // Create fieldvalue input
+            const fieldvalueCell = newRow.insertCell(2);
+            const fieldvalueInput = document.createElement('input');
+            fieldvalueInput.type = 'text';
+            fieldvalueCell.appendChild(fieldvalueInput);
+        }
+
+        function deleteRow() {
+            const table = document.getElementById('dynamicTableBody');
+            const rowCount = table.rows.length;
+            if (rowCount > 0) {  // Only delete if there are rows to delete
+                table.deleteRow(rowCount - 1);
+            }
+        }
+       
+        function onClickSearch() {
+        	var index = 0;
+            var selectedColumnTag = document.getElementById('selectedColumn_fields_'+index+'_fieldName');
+            var orderByVal = document.getElementById('selectedColumn_orderBy').value;
+            var sortOrder = document.getElementById('selectedColumn_order').value;
+            
+            var dynamicTableBody = document.getElementById('dynamicTableBody');
+            var orderByColumnsTableBody = document.getElementById('orderByColumnsTableBody');
+
+            let selectedColumn = {pageSize: 10,currentPage: 1,orderBy:orderByVal,order:sortOrder,fields:[]};
+            while (selectedColumnTag) {
+            	selectedColumn.fields[index] = {};
+            	selectedColumn.fields[index].fieldName=selectedColumnTag.value;
+                index = index+1;
+                selectedColumnTag = document.getElementById('selectedColumn_fields_'+index+'_fieldName');
+            }
+
+
+            const criteria = [];
+            for (let i = 0; i < dynamicTableBody.rows.length; i++) {
+                const row = dynamicTableBody.rows[i];
+                const fieldName = row.cells[0].getElementsByTagName('select')[0].value;
+                const condition = row.cells[1].getElementsByTagName('select')[0].value;
+                const value = row.cells[2].getElementsByTagName('input')[0].value;
+                criteria.push({ fieldName, condition, value });
+            }
+
+            const requestData = {
+             //   entityType : "Role",
+                workQueueName: document.getElementById("workQueueName").value,
+
+                entityType: document.getElementById("entityType").value,
+
+                entityCode: document.getElementById("entityCode").value,
+
+                entityStatus: document.getElementById("entityStatus").value,
+                selectedColumn: selectedColumn,
+                criterias: criteria
+            };
+
+            const jsonData = JSON.stringify(requestData);
+            console.log(jsonData);
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == XMLHttpRequest.DONE) {
+                    if (xhttp.status == 200) {
+                        const response = JSON.parse(xhttp.responseText);
+                        console.log(xhttp.responseText);
+                    } else {
+                        console.error('Search request failed');
+                    }
+                }
+            };
+            
+            xhttp.open("POST", "/exercise/SearchRequestServlet");
+            xhttp.setRequestHeader("Accept", "application/json");
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            xhttp.send(jsonData);
+            
+
+            }
+
+
+        
+             
+    </script>
+</body>
+</html>
